@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="mx.uv.fei.presentation.controllers.VisitRegistrationController"
+      prefHeight="650.0" prefWidth="700.0" style="-fx-background-color: #f8f9fa;">
+    
+    <padding>
+        <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+    </padding>
+
+    <Label text="Registro de Visita" textFill="#2c3e50">
+        <font>
+            <Font name="System Bold" size="26.0" />
+        </font>
+    </Label>
+    
+    <Separator prefWidth="200.0" />
+
+    <Label text="Datos del Visitante" textFill="#34495e">
+        <font><Font name="System Bold" size="18.0" /></font>
+    </Label>
+
+    <GridPane hgap="15.0" vgap="15.0">
+        <columnConstraints>
+            <ColumnConstraints hgrow="NEVER" minWidth="120.0" prefWidth="120.0" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="250.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+
+        <Label text="Tipo:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <ComboBox fx:id="visitorTypeComboBox" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label text="Identificador:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextField fx:id="identifierTextField" promptText="Matrícula, Número de Personal o Folio" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label text="Nombre(s):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <TextField fx:id="firstNameTextField" promptText="Ej. Juan" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label text="Apellidos:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <TextField fx:id="lastNameTextField" promptText="Ej. Pérez García" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+        <Label text="Correo:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <TextField fx:id="emailTextField" promptText="ejemplo@uv.mx" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+    </GridPane>
+
+    <Separator prefWidth="200.0" />
+
+    <Label text="Datos de la Visita" textFill="#34495e">
+        <font><Font name="System Bold" size="18.0" /></font>
+    </Label>
+
+    <VBox spacing="15.0">
+        <HBox alignment="CENTER_LEFT" spacing="15.0">
+            <Label text="Asunto/Motivo:" prefWidth="120.0" />
+            <TextField fx:id="subjectTextField" promptText="Ej. Trámite en Secretaría, Clase, etc." HBox.hgrow="ALWAYS" />
+        </HBox>
+
+        <VBox fx:id="externalFieldsContainer" spacing="15.0" managed="true" visible="true">
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+                <Label text="ID Anfitrión:" prefWidth="120.0" />
+                <TextField fx:id="hostTextField" promptText="ID del miembro UV al que visita" HBox.hgrow="ALWAYS" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+                <Label text="ID Evidencia:" prefWidth="120.0" />
+                <TextField fx:id="evidenceTextField" promptText="ID de la identificación dejada en caseta" HBox.hgrow="ALWAYS" />
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <VBox VBox.vgrow="ALWAYS" />
+
+    <HBox alignment="CENTER_RIGHT" spacing="15.0">
+        <Button text="Cancelar" onAction="#onCancelClick" 
+            prefWidth="120.0" prefHeight="40.0" 
+            style="-fx-background-color: transparent; -fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-text-fill: #7f8c8d; -fx-cursor: hand;" />
+            
+        <Button fx:id="registerButton" text="Registrar Visita" onAction="#onRegisterClick" 
+                prefWidth="180.0" prefHeight="40.0" 
+                style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5; -fx-cursor: hand;" />
+    </HBox>
+
+</VBox>

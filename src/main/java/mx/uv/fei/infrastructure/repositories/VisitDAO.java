@@ -2,14 +2,17 @@ package mx.uv.fei.infrastructure.repositories;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import mx.uv.fei.infrastructure.database.DatabaseConnection;
 import mx.uv.fei.infrastructure.exceptions.DAOException;
 import mx.uv.fei.domain.entities.Visit;
+import mx.uv.fei.domain.dto.Pagination;
 
 public class VisitDAO {
     public boolean insertVisit(Visit visit) throws DAOException {
@@ -52,57 +55,61 @@ public class VisitDAO {
         }
     }
 
-    public List<Visit> getVisitsHistory(int limit, int offset) throws DAOException {
+    public List<Visit> getVisitsByDateRange(LocalDate startDate, LocalDate endDate, Pagination pagination) throws DAOException {
         List<Visit> visits = new ArrayList<>();
-        String query = "SELECT * FROM Visita ORDER BY fecha_entrada DESC, hora_entrada DESC LIMIT ? OFFSET ?";
+        String query = "SELECT * FROM Visita WHERE fecha_entrada BETWEEN ? AND ? ORDER BY fecha_entrada DESC, hora_entrada DESC LIMIT ? OFFSET ?";
 
         try (
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)
         ) {
-            statement.setInt(1, limit);
-            statement.setInt(2, offset);
+            statement.setObject(1, startDate);
+            statement.setObject(2, endDate);
+            
+            statement.setInt(3, pagination.getPageSize());
+            statement.setInt(4, pagination.getOffset());
 
-            try (
-                java.sql.ResultSet resultSet = statement.executeQuery()
-            ) {
-                while (resultSet.next()) {
-                    Visit visit = new Visit(
-                        resultSet.getInt("id_visitante"),
-                        null,
-                        null,
-                        resultSet.getObject("fecha_entrada", java.time.LocalDate.class),
-                        resultSet.getObject("hora_entrada", java.time.LocalTime.class),
-                        resultSet.getString("asunto"),
-                        resultSet.getBoolean("activa")
-                    );
-
-                    int hostId = resultSet.getInt("id_anfitrion");
-                    if (!resultSet.wasNull()) { 
-                        visit.setHostId(hostId); 
-                    }
-
-                    int evidenceId = resultSet.getInt("id_evidencia");
-                    if (!resultSet.wasNull()) { 
-                        visit.setEvidenceId(evidenceId); 
-                    }
-
-                    java.sql.Date exitDate = resultSet.getDate("fecha_salida");
-                    if (exitDate != null) { 
-                        visit.setExitDate(exitDate.toLocalDate()); 
-                    }
-
-                    java.sql.Time exitTime = resultSet.getTime("hora_salida");
-                    if (exitTime != null) { 
-                        visit.setExitTime(exitTime.toLocalTime()); 
-                    }
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Visit visit = new Visit();
+                    visit.setVisitorId(rs.getInt("id_visitante"));
+                    
+                    visit.setHostId((Integer) rs.getObject("id_anfitrion"));
+                    visit.setEvidenceId((Integer) rs.getObject("id_evidencia"));
+                
+                    visit.setEntryDate(rs.getObject("fecha_entrada", LocalDate.class));
+                    visit.setEntryTime(rs.getObject("hora_entrada", java.time.LocalTime.class));
+                    visit.setSubject(rs.getString("asunto"));
+                    visit.setActive(rs.getBoolean("activa"));
 
                     visits.add(visit);
                 }
             }
         } catch (SQLException e) {
-            throw new DAOException("Error SQL al consultar historial: ", e);
+            throw new DAOException("Error al consultar el historial paginado de visitas.", e);
         }
+        
         return visits;
+    }
+
+    public int countVisitsByDateRange(LocalDate startDate, LocalDate endDate) throws DAOException {
+        String query = "SELECT COUNT(*) FROM Visita WHERE fecha_entrada BETWEEN ? AND ?";
+        
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            
+            statement.setObject(1, startDate);
+            statement.setObject(2, endDate);
+            
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Error al contar el total de visitas.", e);
+        }
+        
+        return 0;
     }
 }

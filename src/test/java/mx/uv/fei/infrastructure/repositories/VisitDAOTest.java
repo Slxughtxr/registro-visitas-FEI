@@ -1,13 +1,17 @@
 package mx.uv.fei.infrastructure.repositories;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+
 import mx.uv.fei.domain.entities.ExternalVisitor;
 import mx.uv.fei.domain.entities.Visit;
 import mx.uv.fei.domain.entities.Visitor;
 import mx.uv.fei.infrastructure.exceptions.DAOException;
+import mx.uv.fei.domain.dto.Pagination;
 
 public class VisitDAOTest {
 
@@ -66,23 +70,16 @@ public class VisitDAOTest {
         assertTrue(isCheckedOut, "La visita activa debería actualizarse con la fecha y hora de salida");
     }
 
-    @Test
-    public void testGetVisitsHistoryPagination() throws DAOException {
+     @Test
+    public void testGetVisitsByDateRangeEmpty() throws DAOException {
         VisitDAO visitDAO = new VisitDAO();
-        
-        int limit = 5;
-        int offset = 0;
+        LocalDate start = LocalDate.of(1900, 1, 1);
+        LocalDate end   = LocalDate.of(1900, 1, 2);
+        Pagination page = new Pagination(10, 0);
 
-        java.util.List<Visit> historial = visitDAO.getVisitsHistory(limit, offset);
+        List<Visit> historial = visitDAO.getVisitsByDateRange(start, end, page);
 
-        org.junit.jupiter.api.Assertions.assertNotNull(historial, "La lista de historial no debería ser nula");
-        assertTrue(historial.size() <= limit, "La lista no debe exceder el límite de " + limit + " registros");
-        
-        System.out.println("Se recuperaron " + historial.size() + " registros del historial.");
-        
-        if (!historial.isEmpty()) {
-            Visit masReciente = historial.get(0);
-            System.out.println("-> La visita más reciente es del: " + masReciente.getEntryDate() + " a las " + masReciente.getEntryTime());
-        }
+        assertNotNull(historial, "La lista no debe ser nula incluso si no hay registros");
+        assertTrue(historial.isEmpty(), "Debiera regresar lista vacía para periodo sin visitas");
     }
 }
