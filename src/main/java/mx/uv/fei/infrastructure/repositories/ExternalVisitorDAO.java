@@ -26,6 +26,7 @@ public class ExternalVisitorDAO {
             statement.setInt(1, visitorId);
             statement.setInt(2, external.getIdentificationTypeId());
             statement.setString(3, external.getDocumentFolio());
+            external.setId(visitorId);
 
             return statement.executeUpdate() > 0;   
         } catch (SQLException e) {

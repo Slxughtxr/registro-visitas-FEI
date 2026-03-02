@@ -27,6 +27,7 @@ public class InstitutionalMemberDAO {
             statement.setInt(1, visitorId);
             statement.setString(2, member.getInstitutionalId());
             statement.setString(3, member.getMemberType().getDatabaseValue());
+            member.setId(visitorId);
 
             return statement.executeUpdate() > 0; 
         } catch (SQLException e) {

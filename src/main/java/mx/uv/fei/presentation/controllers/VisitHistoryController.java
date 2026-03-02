@@ -4,13 +4,23 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.Label;
+import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
 import javafx.scene.control.cell.PropertyValueFactory;
+
 import mx.uv.fei.domain.dto.Pagination;
+import mx.uv.fei.domain.entities.ExternalVisitor;
+import mx.uv.fei.domain.entities.InstitutionalMember;
 import mx.uv.fei.domain.entities.Visit;
+import mx.uv.fei.domain.entities.Visitor;
 import mx.uv.fei.domain.exceptions.ServiceException;
 import mx.uv.fei.domain.services.visits.VisitReportService;
 import mx.uv.fei.presentation.utils.WindowManager;
+import mx.uv.fei.domain.services.visitors.VisitorSearchService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -18,11 +28,11 @@ import java.time.LocalTime;
 import java.util.List;
 
 public class VisitHistoryController {
-
     @FXML private DatePicker startDatePicker;
     @FXML private DatePicker endDatePicker;
     @FXML private TableView<Visit> visitsTable;
-    @FXML private TableColumn<Visit, Integer> visitorIdColumn;
+    @FXML private TableColumn<Visit, String> visitorIdentifierColumn;
+    @FXML private TableColumn<Visit, String> visitorTypeColumn;
     @FXML private TableColumn<Visit, String> subjectColumn;
     @FXML private TableColumn<Visit, LocalDate> dateColumn;
     @FXML private TableColumn<Visit, LocalTime> timeColumn;
@@ -33,6 +43,7 @@ public class VisitHistoryController {
     @FXML private Button nextButton;
 
     private final VisitReportService reportService = new VisitReportService();
+    private final VisitorSearchService visitorSearchService = new VisitorSearchService();
     
     private int currentPage = 1;
     private final int pageSize = 15; 
@@ -40,7 +51,37 @@ public class VisitHistoryController {
 
     @FXML
     public void initialize() {
-        visitorIdColumn.setCellValueFactory(new PropertyValueFactory<>("visitorId"));
+        visitorIdentifierColumn.setCellValueFactory(cellData -> {
+            try {
+                Visitor visitor = visitorSearchService.findVisitorByInternalId(cellData.getValue().getVisitorId());
+                
+                if (visitor != null) {
+                    if (visitor instanceof InstitutionalMember) {
+                        return new SimpleStringProperty(((InstitutionalMember) visitor).getInstitutionalId());
+                    } else if (visitor instanceof ExternalVisitor) {
+                        return new SimpleStringProperty(((ExternalVisitor) visitor).getDocumentFolio());
+                    }
+                }
+            } catch (ServiceException e) {
+                return new SimpleStringProperty("Error al recuperar");
+            }
+            return new SimpleStringProperty("Desconocido");
+        });
+
+        visitorTypeColumn.setCellValueFactory(cellData -> {
+            try {
+                Visitor visitor = visitorSearchService.findVisitorByInternalId(cellData.getValue().getVisitorId());
+                
+                if (visitor != null) {
+                    String type = (visitor instanceof InstitutionalMember) ? "Miembro Institucional" : "Externo";
+                    return new SimpleStringProperty(type);
+                }
+            } catch (ServiceException e) {
+                return new SimpleStringProperty("Error al recuperar");
+            }
+            return new SimpleStringProperty("Desconocido");
+        });
+
         subjectColumn.setCellValueFactory(new PropertyValueFactory<>("subject"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("entryDate"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("entryTime"));
@@ -83,14 +124,11 @@ public class VisitHistoryController {
         LocalDate end = endDatePicker.getValue();
 
         try {
-            // Obtenemos el total de páginas usando tu servicio
             maxPages = reportService.getTotalPages(start, end, pageSize);
             if (maxPages == 0) maxPages = 1;
 
-            // Instanciamos tu DTO Pagination con el constructor que definiste
             Pagination pagination = new Pagination(currentPage, pageSize);
 
-            // Recuperamos la lista de la base de datos
             List<Visit> visits = reportService.getVisitHistory(start, end, pagination);
             
             ObservableList<Visit> visitObservableList = FXCollections.observableArrayList(visits);

@@ -9,13 +9,13 @@
 
 <VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="mx.uv.fei.presentation.controllers.RegisterExitController"
-      prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: #f8f9fa;">
+      prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: #f8f9fa;">
     
     <padding>
         <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
     </padding>
 
-    <Label text="Registrar Salida" textFill="#e74c3c">
+    <Label text="Registrar Salida" textFill="#2c3e50">
         <font>
             <Font name="System Bold" size="28.0" />
         </font>
@@ -36,7 +36,7 @@
 
     <Button text="Registrar Salida" onAction="#onRegisterExitClick" 
             prefWidth="200.0" prefHeight="45.0" 
-            style="-fx-font-size: 16px; -fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;" />
+            style="-fx-font-size: 16px; -fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;" />
 
     <Button text="Volver al Menú" onAction="#onBackClick" 
             prefWidth="200.0" prefHeight="40.0" 

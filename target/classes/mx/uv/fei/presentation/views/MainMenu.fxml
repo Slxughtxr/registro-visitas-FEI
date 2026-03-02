@@ -8,7 +8,7 @@
 
 <VBox alignment="CENTER" spacing="25.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="mx.uv.fei.presentation.controllers.MainMenuController"
-      prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: #f8f9fa;">
+      prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: #f8f9fa;">
     
     <padding>
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />

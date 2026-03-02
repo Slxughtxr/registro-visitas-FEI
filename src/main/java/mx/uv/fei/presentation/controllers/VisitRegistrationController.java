@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+
 import mx.uv.fei.domain.entities.ExternalVisitor;
 import mx.uv.fei.domain.entities.InstitutionalMember;
 import mx.uv.fei.domain.entities.Visit;
@@ -13,8 +14,11 @@ import mx.uv.fei.domain.exceptions.ServiceException;
 import mx.uv.fei.domain.services.visitors.VisitorRegistrationService;
 import mx.uv.fei.domain.services.visits.VisitEntryService;
 import mx.uv.fei.presentation.utils.WindowManager;
+import mx.uv.fei.domain.services.catalogs.CatalogService;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class VisitRegistrationController {
     @FXML private TextField identifierTextField;
@@ -22,8 +26,11 @@ public class VisitRegistrationController {
     @FXML private TextField lastNameTextField;
     @FXML private TextField emailTextField;
     @FXML private ComboBox<String> visitorTypeComboBox;
+    @FXML private ComboBox<String> hostComboBox;
+    @FXML private ComboBox<String> evidenceComboBox;
 
-    // --- Campos de la Visita ---
+    @FXML private ComboBox<String> identificationTypeComboBox; 
+
     @FXML private TextField subjectTextField;
     @FXML private VBox externalFieldsContainer;
     @FXML private TextField hostTextField;
@@ -33,12 +40,35 @@ public class VisitRegistrationController {
 
     private final VisitorRegistrationService visitorService = new VisitorRegistrationService();
     private final VisitEntryService visitService = new VisitEntryService();
+    private final CatalogService catalogService = new CatalogService();
 
     private Visitor currentVisitor;
+    
+    private Map<String, Integer> idCatalogMap = new HashMap<>();
+    private Map<String, Integer> hostCatalogMap = new HashMap<>();
+    private Map<String, Integer> evidenceCatalogMap = new HashMap<>();
 
     @FXML
     public void initialize() {
         visitorTypeComboBox.setItems(FXCollections.observableArrayList("Interno (FEI/UV)", "Externo"));
+        
+        try {
+            idCatalogMap = catalogService.getIdentificationTypes();
+            hostCatalogMap = catalogService.getHosts();
+            evidenceCatalogMap = catalogService.getEvidences();
+            
+            if (identificationTypeComboBox != null) {
+                identificationTypeComboBox.setItems(FXCollections.observableArrayList(idCatalogMap.keySet()));
+            }
+            if (hostComboBox != null) {
+                hostComboBox.setItems(FXCollections.observableArrayList(hostCatalogMap.keySet()));
+            }
+            if (evidenceComboBox != null) {
+                evidenceComboBox.setItems(FXCollections.observableArrayList(evidenceCatalogMap.keySet()));
+            }
+        } catch (ServiceException e) {
+            showErrorMessage("Error de Catálogos", "No se pudieron cargar las listas desplegables. Contacte al administrador.");
+        }
         
         visitorTypeComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             boolean isExternal = "Externo".equals(newVal);
@@ -74,6 +104,7 @@ public class VisitRegistrationController {
         }
     }
 
+    @FXML
     public void onCancelClick() {
         try {
             WindowManager.changeScene("SearchVisitor.fxml", "Registrar Entrada - FEI");
@@ -113,6 +144,18 @@ public class VisitRegistrationController {
             newExternal.setLastName(lastNameTextField.getText());
             newExternal.setEmail(emailTextField.getText());
             
+            // NUEVA LÓGICA: Validar y asignar el ID del catálogo
+            String selectedIdType = identificationTypeComboBox.getValue();
+            if (selectedIdType == null || selectedIdType.isEmpty()) {
+                throw new ServiceException("Debe seleccionar un tipo de identificación para el visitante externo.");
+            }
+            
+            // Recuperamos el int (1, 2, 3...) usando el nombre seleccionado
+            int idIdentificacion = idCatalogMap.get(selectedIdType);
+            
+            // ATENCIÓN: Asegúrate de que tu clase ExternalVisitor tenga este método
+            newExternal.setIdentificationTypeId(idIdentificacion); 
+            
             visitorService.registerExternalVisitor(newExternal);
             this.currentVisitor = newExternal; 
         } else {
@@ -136,11 +179,14 @@ public class VisitRegistrationController {
 
         boolean isExternal = "Externo".equals(visitorTypeComboBox.getValue());
         if (isExternal) {
-            if (!hostTextField.getText().isEmpty()) {
-                newVisit.setHostId(Integer.parseInt(hostTextField.getText()));
+            String selectedHost = hostComboBox.getValue();
+            if (selectedHost != null && !selectedHost.isEmpty()) {
+                newVisit.setHostId(hostCatalogMap.get(selectedHost));
             }
-            if (!evidenceTextField.getText().isEmpty()) {
-                newVisit.setEvidenceId(Integer.parseInt(evidenceTextField.getText()));
+            
+            String selectedEvidence = evidenceComboBox.getValue();
+            if (selectedEvidence != null && !selectedEvidence.isEmpty()) {
+                newVisit.setEvidenceId(evidenceCatalogMap.get(selectedEvidence));
             }
         }
 

@@ -56,7 +56,9 @@
 
     <TableView fx:id="visitsTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 5; -fx-border-radius: 5;">
         <columns>
-            <TableColumn fx:id="visitorIdColumn" prefWidth="120.0" text="ID Visitante" />
+            <TableColumn fx:id="visitorIdentifierColumn" prefWidth="120.0" text="Identificación" />
+            <TableColumn fx:id="visitorTypeColumn" prefWidth="150.0" text="Tipo de Visitante" />
+            
             <TableColumn fx:id="subjectColumn" prefWidth="300.0" text="Asunto / Motivo" />
             <TableColumn fx:id="dateColumn" prefWidth="130.0" text="Fecha Entrada" />
             <TableColumn fx:id="timeColumn" prefWidth="130.0" text="Hora Entrada" />

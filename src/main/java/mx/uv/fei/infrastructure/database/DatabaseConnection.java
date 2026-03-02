@@ -19,7 +19,6 @@ public class DatabaseConnection {
             if (connection == null || connection.isClosed()) {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                System.out.println("¡Conexión a la base de datos establecida con éxito!");
             }
         } catch (ClassNotFoundException e) {
             throw new SQLException("Error: No se encontró el driver de MySQL.", e);
