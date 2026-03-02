@@ -14,4 +14,14 @@ public enum MemberType {
     public String getDatabaseValue() {
         return databaseValue;
     }
+
+    public static MemberType fromDatabaseValue(String value) {
+        for (MemberType type : MemberType.values()) {
+            if (type.getDatabaseValue().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
+        
+        throw new IllegalArgumentException("Tipo de miembro desconocido en la BD: " + value);
+    }
 }
