@@ -95,6 +95,13 @@ public class VisitHistoryController {
         endDatePicker.setValue(LocalDate.now());
 
         loadData();
+
+        visitsTable.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && visitsTable.getSelectionModel().getSelectedItem() != null) {
+                Visit selectedVisit = visitsTable.getSelectionModel().getSelectedItem();
+                showVisitDetails(selectedVisit);
+            }
+        });
     }
 
     @FXML
@@ -145,6 +152,73 @@ public class VisitHistoryController {
         pageLabel.setText("Página " + currentPage + " de " + maxPages);
         prevButton.setDisable(currentPage <= 1);
         nextButton.setDisable(currentPage >= maxPages);
+    }
+
+    private void showVisitDetails(Visit visit) {
+        try {
+            Visitor visitor = visitorSearchService.findVisitorByInternalId(visit.getVisitorId());
+            
+            StringBuilder details = new StringBuilder();
+            
+            renderVisitorDetails(visitor, details);
+            
+            details.append("\n--- DATOS DE LA VISITA ---\n");
+            details.append("Motivo/Asunto: ").append(visit.getSubject()).append("\n");
+            details.append("Entrada: ").append(visit.getEntryDate()).append(" a las ").append(visit.getEntryTime()).append("\n");
+            
+            renderVisitStatus(visit, details);
+           
+            if (isValidId(visit.getHostId())) {
+                details.append("\nID Anfitrión visitado: ").append(visit.getHostId()).append("\n");
+            }
+            if (isValidId(visit.getEvidenceId())) {
+                details.append("ID Evidencia dejada: ").append(visit.getEvidenceId()).append("\n");
+            }
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Detalles de la Visita");
+            alert.setHeaderText("Información completa del registro"); 
+            alert.setContentText(details.toString());
+            
+            alert.getDialogPane().setMinWidth(400);
+            alert.showAndWait();
+
+        } catch (ServiceException e) {
+            showErrorMessage("Error de Consulta", "No se pudo cargar la información completa del visitante.");
+        }
+    }
+
+    private boolean isValidId(Integer id){
+        return id != null && id > 0;
+    }
+
+    private void renderVisitorDetails(Visitor visitor, StringBuilder details){
+        details.append("--- DATOS DEL VISITANTE ---\n");
+        if (visitor != null) {
+            details.append("Nombre: ").append(visitor.getFirstName()).append(" ").append(visitor.getLastName()).append("\n");
+            details.append("Correo: ").append(visitor.getEmail()).append("\n");
+                
+            if (visitor instanceof InstitutionalMember) {
+                details.append("Tipo: Miembro Institucional (FEI/UV)\n");
+                details.append("Matrícula/No. Personal: ").append(((InstitutionalMember) visitor).getInstitutionalId()).append("\n");
+            } else if (visitor instanceof ExternalVisitor) {
+                details.append("Tipo: Visitante Externo\n");
+                details.append("Folio de Identificación: ").append(((ExternalVisitor) visitor).getDocumentFolio()).append("\n");
+           }
+        } else {
+            details.append("Advertencia: Visitante no encontrado en la base de datos.\n");
+        }
+    }
+
+    private void renderVisitStatus(Visit visit, StringBuilder details){
+         if (!visit.isActive()) {
+                String exitDate = (visit.getExitDate() != null) ? visit.getExitDate().toString() : "No registrada";
+                String exitTime = (visit.getExitTime() != null) ? visit.getExitTime().toString() : "No registrada";
+                details.append("Salida: ").append(exitDate).append(" a las ").append(exitTime).append("\n");
+                details.append("Estado: Finalizada\n");
+        } else {
+            details.append("Estado: En curso (Activa)\n");
+        }
     }
 
     @FXML

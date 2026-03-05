@@ -144,16 +144,13 @@ public class VisitRegistrationController {
             newExternal.setLastName(lastNameTextField.getText());
             newExternal.setEmail(emailTextField.getText());
             
-            // NUEVA LÓGICA: Validar y asignar el ID del catálogo
             String selectedIdType = identificationTypeComboBox.getValue();
             if (selectedIdType == null || selectedIdType.isEmpty()) {
                 throw new ServiceException("Debe seleccionar un tipo de identificación para el visitante externo.");
             }
             
-            // Recuperamos el int (1, 2, 3...) usando el nombre seleccionado
             int idIdentificacion = idCatalogMap.get(selectedIdType);
             
-            // ATENCIÓN: Asegúrate de que tu clase ExternalVisitor tenga este método
             newExternal.setIdentificationTypeId(idIdentificacion); 
             
             visitorService.registerExternalVisitor(newExternal);
